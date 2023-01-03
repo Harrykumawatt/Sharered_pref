@@ -1,0 +1,87 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+
+class second extends StatelessWidget {
+  const second({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(),
+        body: MyApp(),
+      ),
+    );
+  }
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool toggle = false;
+  double _value = 38;
+  late SharedPreferences _pref;
+  String prefKey = "value";
+
+  // function to save to pref
+  void saveOnPref(double value) async {
+    _pref = await SharedPreferences.getInstance();
+    _pref.setDouble(prefKey, value);
+  }
+
+  // this function load and update value
+  void loadFromPref() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _value = _pref.getDouble(prefKey) ?? 38.0;
+    });
+  }
+
+  @override
+  void initState() {
+    loadFromPref();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Test",
+          style: TextStyle(fontSize: _value),
+        ),
+        Switch(
+          onChanged: (value) {
+            setState(() {
+              toggle = !toggle;
+            });
+          },
+          value: toggle,
+        ),
+        Slider(
+          thumbColor: Colors.red.shade900,
+          value: _value,
+          activeColor: Colors.black,
+          inactiveColor: Colors.grey.shade400,
+          min: 20.0,
+          max: 60.0,
+          onChanged: toggle
+              ? (value) {
+                  setState(() {
+                    _value = value;
+                  });
+                  saveOnPref(value);
+                }
+              : null,
+        )
+      ],
+    );
+  }
+}
